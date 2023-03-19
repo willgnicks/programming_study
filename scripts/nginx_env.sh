@@ -1,44 +1,65 @@
 #!/bin/bash
 
-PUBLIC=$(pwd)"/public.sh"
-PACKAGE="nginx-1.22.0.tar.gz"
-IP="http://nginx.org/download/"
+NGINX_MODULE="Nginx_Module"
+URL_SYMBOL="nginx.url"
+PACKAGE_SYMBOL="nginx.package"
+MODULE_NAME="nginx"
 
-function sourcePublic()
-{
-    if [[ ! -f "$PUBLIC" ]];then
-        echo "[ERROR] Shell script, $PUBLIC, do not exist. This script exit! [ERROR] "
+function source_common() {
+    # shellcheck disable=SC2086
+    cd $(dirname $0)
+    local path=$(pwd)"/common.sh"
+    if [[ ! -f "${path}" ]]; then
+        echo "[ERROR] Script ${path} does not exist, unable to process further."
         exit
     fi
-    source "$PUBLIC"
+    source "${path}"
+    PACKAGE=$(getConfig "${PACKAGE_SYMBOL}")
+    URL=$(getConfig "${URL_SYMBOL}")
 }
 
-function downloadPackage()
-{
-    splitline "*"
-    echoLog "nginx_env.sh/DownloadPackage" "Invoke public download function starting, input parameters { url : $IP, package : $PACKAGE}!" "INFO"
-    download $IP $PACKAGE
-    if [[ $? -eq 0 ]];then
-        splitline "*"
+# check whether it is already install on server
+function check_nginx() {
+    local dir_path="${INSTALL_PATH}/${MODULE_NAME}"
+    if [ -d "${dir_path}" ]; then
+        logger "WARN" "${NGINX_MODULE}" "${MODULE_NAME} under path ${INSTALL_PATH} exists, no need more further operate"
+        return 0
     fi
-    echoLog "nginx_env.sh/DownloadPackage" "Download function successfully ends!" "INFO"
+    return 1
 }
 
-function untar()
-{
-    untarPackage "$PACKAGE"
-    echoLog "nginx_env.sh/Untar" "Invoke public untarPackage starting, input parameters { package : $PACKAGE}!" "INFO"
-    if [[ $? -eq 0 ]];then
-        splitline "*"
+# download nginx
+function download_nginx() {
+    local package_path="${DOWNLOAD_PATH}/${PACKAGE}"
+    if [ -f "${package_path}" ]; then
+        logger "WARN" "${NGINX_MODULE}" "${PACKAGE} has already been downloaded, no need download again"
+        return 1
     fi
-    echoLog "nginx_env.sh/Untar" "UntarPackage function successfully ends!" "INFO"
+    logger "INFO" "${NGINX_MODULE}" "invoke common module to process downloading ${PACKAGE}"
+    download "${URL}" "$PACKAGE"
+    # shellcheck disable=SC2181
+    if [ $? -eq 0 ]; then
+        return 0
+    fi
+    return 1
 }
 
-function main()
-{
-    sourcePublic
-    downloadPackage
-    untar
+function extract_nginx() {
+    logger "INFO" "${NGINX_MODULE}" "invoke common module to process extract $PACKAGE"
+    extract "$PACKAGE" "${MODULE_NAME}"
+    logger "INFO" "${NGINX_MODULE}" "${PACKAGE} extract finished"
+}
+
+function main() {
+    source_common
+
+    if check_nginx; then
+        return 0
+    fi
+
+    download_nginx
+
+    extract_nginx
 }
 
 main

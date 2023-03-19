@@ -11,7 +11,7 @@
     - [2.2 安装依赖包](#22-安装依赖包)
     - [2.3 设置国内yum源](#23-设置国内yum源)
     - [2.4 更新yum软件包索引](#24-更新yum软件包索引)
-    - [2.5 安装社区版docker [docker-ce]，ee是企业版](#25-安装社区版docker-docker-ceee是企业版)
+    - [2.5 安装社区版docker \[docker-ce\]，ee是企业版](#25-安装社区版docker-docker-ceee是企业版)
 # 安装
 
 ## 1. 源码安装
@@ -27,7 +27,7 @@
 mkdir -p /opt/tools/docker
 
 # 下载源码压缩包至目录
-wget -P /opt/tools https://download.docker.com/linux/static/stable/x86_64/docker-19.03.15.tgz
+wget -P /opt/tools https://download.docker.com/linux/static/stable/x86_64/docker-20.10.23.tgz
 
 # 解压源码至工具路径下
 tar -xvf /opt/tools/docker-19.03.15.tgz -C /opt/tools/docker --strip-components 1

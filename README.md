@@ -1,4 +1,5 @@
 
+> 本学习主要记录编程学习的笔记及心得，包含java，python，golang，shell等内容
 
 
 ## [计算机基础](docs/computer_science/README.md)
@@ -21,11 +22,12 @@
 ## [Java](docs/java/README.md)
 
 - [Java基础](docs/java/javaSE/README.md)
-- [集合](docs/java/)
+- [集合](docs/java/collections/README.md)
 - [IO](docs/java/io/README.md)
 - [JUC并发编程](docs/java/juc/README.md)
 - [JVM](docs/java/jvm/README.md)
-- [新特性](docs/java/new/README.md)
+- [新特性](docs/java/新特性/README.md)
+
 ## [框架](docs/framework/README.md)
   
 - [基础框架](docs/framework/foundation/README.md)
