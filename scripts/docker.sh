@@ -82,8 +82,20 @@ function extract_docker() {
 }
 
 function config_docker() {
+    logger "INFO" "${DOCKER_MODULE}" "invoke common module to link source to executor"
+
+    local dirs=$(ls "${INSTALL_PATH}/${MODULE_NAME}")
+    for exec in $dirs;
+    do
+        rm -f "/usr/bin/${exec}"
+        links "${INSTALL_PATH}/${MODULE_NAME}/${exec}" "/usr/bin/${exec}"
+    done
+
+    logger "INFO" "${DOCKER_MODULE}" "add register and repository info into relevant file"
     printf "%s\n" "${REGISTER_CONTENT}" >>"$REGISTER_FILE"
     printf "%s\n" "${REPOSITORY_CONTENT}" >>"${REPOSITORY_FILE}"
+
+    logger "INFO" "${DOCKER_MODULE}" "set docker self start and restart it"
     chmod a+x "${REGISTER_FILE}"
     systemctl daemon-reload
     systemctl enable docker.service
