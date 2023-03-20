@@ -1,11 +1,23 @@
 #!/bin/bash
 
-# python environment building
-
 PYTHON_MODULE="Python_Module"
 URL_SYMBOL="python.url"
 PACKAGE_SYMBOL="python.package"
 MODULE_NAME="python"
+
+PIP_CONFIG="[global]
+index-url = https://pypi.tuna.tsinghua.edu.cn/simple
+[install]
+use-mirrors = true
+mirrors = https://pypi.tuna.tsinghua.edu.cn/simple
+trusted-host = https://pypi.tuna.tsinghua.edu.cn/simple"
+
+WRAPPER_CONFIG="# virtualenvwrapper
+export WORKON_HOME="~/.virtualenvs"
+export VIRTUALENVWRAPPER_PYTHON="/usr/bin/python"
+# set shell script
+source /usr/local/bin/virtualenvwrapper.sh"
+
 
 function source_common() {
     # shellcheck disable=SC2086
@@ -52,13 +64,12 @@ function extract_python() {
     logger "INFO" "${PYTHON_MODULE}" "${PACKAGE} extract finished"
 }
 
-function removeOldVersion3() {
-    # 卸载python3
-    rpm -qa | grep python3 | xargs rpm -ev --allmatches --nodeps
-    # 卸载python2
+function remove_version_2() {
     rpm -qa | grep python | xargs rpm -ev --allmatches --nodeps
-    # 删除所有残余文件 成功卸载！
-    whereis python3 | xargs rm -frv
+    local result=$(whereis python3 | xargs rm -frv)
+    if [ -z "${result}" ]; then
+        return 0
+    fi
 }
 
 function configure_python() {
@@ -68,41 +79,54 @@ function configure_python() {
 }
 
 function link_python() {
+    logger "INFO" "${PYTHON_MODULE}" "remove old soft link and build new one towards install path"
+    rm /usr/bin/python
+    rm /usr/bin/pip
     links "${INSTALL_PATH}/${MODULE_NAME}/bin/python3" "/usr/bin/python"
     links "${INSTALL_PATH}/${MODULE_NAME}/bin/pip3" "/usr/bin/pip"
 }
 
 function configure_pip() {
-    mkdir ~/.pip
-    local pip_config="[global]
-index-url = https://pypi.tuna.tsinghua.edu.cn/simple
-[install]
-use-mirrors = true
-mirrors = https://pypi.tuna.tsinghua.edu.cn/simple
-trusted-host = https://pypi.tuna.tsinghua.edu.cn/simple"
+    logger "INFO" "${PYTHON_MODULE}" "start to configure pip and write config info to pip.conf"
+    mkdir -p ~/.pip
+    printf "%s\n" "${PIP_CONFIG}" >~/.pip/pip.conf
+}
 
-    printf "%s\n" >>~/.pip/pip.conf
+function configure_virtualEnvWrapper() {
+    pip install virtualenvwrapper
+    add_path "${WRAPPER_CONFIG}" "~/.bashrc"
 }
 
 function main() {
     source_common
+    logger "INFO" "${PYTHON_MODULE}" "process python environment build script"
+
+    if remove_version_2; then
+        logger "INFO" "${PYTHON_MODULE}" "uninstall python2 finished and clearly"
+    fi
 
     if check_python; then
         return 0
     fi
 
+    logger "INFO" "${PYTHON_MODULE}" "finish checking python install status and it is able to reinstall python"
+
     download_python
 
     extract_python
 
-    if configure_python -ne 0; then
-        return 1
+    if configure_python -eq 0; then
+
+        link_python
+
+        configure_pip
+
+        configure_virtualEnvWrapper
+
+        return 0
     fi
 
-    link_python
-
-    configure_pip
-
+    logger "WARN" "${PYTHON_MODULE}" "configure python failed as maybe gcc version limit"
 }
 
 main

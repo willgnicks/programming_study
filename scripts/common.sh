@@ -113,11 +113,10 @@ function extract() {
 }
 
 # add env variable to path
-# given two parameters are
-# 1. content need to be added to file
-# 2. path of file to be added and sourced
-function addPath() {
-    printf "$1" >>"$2"
+# @param $1  append content
+# @param $2  source file to be appended
+function add_path() {
+    printf "%s\n" "$1" >>"$2"
     source "$2"
 }
 
@@ -146,9 +145,8 @@ function make_dirs() {
 }
 
 # add soft link from a to b
-# given two parameters are
-# 1. from position
-# 2. target position
+# @param $1  soft link source path
+# @param $2  soft link target path
 function links() {
     ln -s "$1" "$2"
     verify $? "create soft link from $1 to $2"
