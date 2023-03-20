@@ -55,7 +55,8 @@ function extract_python() {
 function removeOldVersion3() {
     # 卸载python3
     rpm -qa | grep python3 | xargs rpm -ev --allmatches --nodeps
-
+    # 卸载python2
+    rpm -qa | grep python | xargs rpm -ev --allmatches --nodeps
     # 删除所有残余文件 成功卸载！
     whereis python3 | xargs rm -frv
 }
@@ -67,26 +68,28 @@ function configure_python() {
 }
 
 function link_python() {
-    links "${INSTALL_PATH}/${MODULE_NAME}/bin/python3" "/usr/bin/python3"
-    links "${INSTALL_PATH}/${MODULE_NAME}/bin/pip3" "/usr/bin/pip3"
+    links "${INSTALL_PATH}/${MODULE_NAME}/bin/python3" "/usr/bin/python"
+    links "${INSTALL_PATH}/${MODULE_NAME}/bin/pip3" "/usr/bin/pip"
 }
 
-function config_pip() {
+function configure_pip() {
     mkdir ~/.pip
-    echo "[global]
+    local pip_config="[global]
 index-url = https://pypi.tuna.tsinghua.edu.cn/simple
 [install]
 use-mirrors = true
 mirrors = https://pypi.tuna.tsinghua.edu.cn/simple
-trusted-host = https://pypi.tuna.tsinghua.edu.cn/simple" >~/.pip/pip.conf
+trusted-host = https://pypi.tuna.tsinghua.edu.cn/simple"
+
+    printf "%s\n" >>~/.pip/pip.conf
 }
 
 function main() {
     source_common
 
-#    if check_python; then
-#        return 0
-#    fi
+    if check_python; then
+        return 0
+    fi
 
     download_python
 
@@ -96,9 +99,9 @@ function main() {
         return 1
     fi
 
-#    link_python
+    link_python
 
-#    config_pip
+    configure_pip
 
 }
 

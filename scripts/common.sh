@@ -67,7 +67,7 @@ function verify() {
 # 1. the url of download resource website
 # 2. the package name for download
 function download() {
-    logger "INFO" "${COMMON_MODULE}" "start downloading, parameters = { package : $2, url : $1 }"
+    logger "INFO" "${COMMON_MODULE}" "start to download $2 with url $1"
     local url=$1
     local package=$2
     if [[ -z $package ]] || [[ -z $url ]]; then
@@ -76,7 +76,7 @@ function download() {
     fi
 
     if [[ ! -e "${DOWNLOAD_PATH}/$package" ]]; then
-        wget -P "${DOWNLOAD_PATH}" "$url/$package"
+        wget -q -P "${DOWNLOAD_PATH}" "$url/$package"
         verify $? "downloading package $package!"
         logger "INFO" "${COMMON_MODULE}" "download $package success"
         return 0

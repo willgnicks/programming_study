@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function installDependency()
+function install_dependencies()
 {
     # 安装wget
     yum install -y wget
@@ -20,6 +20,8 @@ function installDependency()
     # 升级依赖
     yum upgrade
 }
+
+install_dependencies
 
 function makeAllDirs()
 {

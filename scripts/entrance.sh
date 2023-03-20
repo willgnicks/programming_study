@@ -33,8 +33,6 @@ function inits() {
 function downloads() {
     for name in ${NAMES[*]};
     do
-    {
-
         local package=$(getConfig "${name}.package")
         local url=$(getConfig "${name}.url")
         logger "INFO" "${ENTRANCE_MODULE}" "invoke common-module to process downloading ${package}"
@@ -50,9 +48,7 @@ function downloads() {
         splitline
         splitline "#"
         splitline
-    }&
     done
-    wait
 }
 
 # main func
